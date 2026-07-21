@@ -10,7 +10,6 @@ Two empirical count datasets back the paper's real-data analysis (paper `tab:met
 data/
   FIFA.csv           - international football results (long table); filtered in code
   insurance.csv      - Kaggle medical-insurance records; discretized in code
-  eda_datasets.ipynb - exploratory analysis (descriptive stats, smoker/non-smoker split)
   README.md          - this file
 ```
 
@@ -30,13 +29,6 @@ data/
   (paper `tab:insurance-split`); the full-sample multimodality is a smoker/non-smoker
   mixture artifact.
 - **Shape**: bimodal; mean 20.88, variance 59.46, V/M = 2.85.
-
-## Removed dataset
-
-Sepsis (PhysioNet MIMIC-IV lab-test counts) was removed from the project in the 2026-07 cleanup:
-the paper excludes it, and the PhysioNet Credentialed Health Data License forbids committing the
-CSV. The loader (`load_sepsis_lab_counts`) and `data/Sepsis.csv` were deleted; the file remains
-in git history only. If it is ever reintroduced, `data/Sepsis.csv` MUST be gitignored (DUA).
 
 ## License roll-up
 
