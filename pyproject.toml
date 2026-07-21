@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpoe"
+version = "1.0.0"
+description = "CPOE (COM-Poisson Orthogonal Expansion): complete computing pipeline for Lee, Lee & Ha (2026), 'Semi-Parametric Extensions of the Conway-Maxwell-Poisson Distribution via Orthogonal Polynomial Bases'"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pyyaml>=6.0",
+    "matplotlib>=3.10.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -1,0 +1,15 @@
+# Hyperparameters externalized from src/cpoe/* to avoid silent artifact propagation.
+# Every arbitrary numerical threshold used by the library is declared here so it can
+# be swept explicitly; no module under src/cpoe/ may hardcode a regime threshold.
+
+# --- COM-Poisson Z(lambda, nu) truncation policy (paper Section 5, Algorithm 1) ---
+TOL: 1.0e-12                  # log-sum-exp residual tolerance for Z truncation
+DECAY_STREAK_REQUIRED: 5      # consecutive decreasing log-terms required before tail check
+M_HARD_MAX: 100000            # hard upper bound on truncation index
+
+# --- Admissible parameter box for the COM-Poisson baseline ---
+# Safeguards used by the MoM Newton solve and the MLE optimizers. NU_MIN is the
+# dominant sensitivity lever; sweep grid: {0.005, 0.01, 0.02, 0.05}.
+NU_MIN: 0.02                  # baseline floor for nu
+NU_MAX: 20.0                  # ceiling for nu (under-dispersion); sweep grid: {10, 20, 50}
+LAM_MIN: 1.0e-3               # floor for lambda

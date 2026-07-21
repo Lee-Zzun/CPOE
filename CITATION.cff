@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the manuscript below (under review;
+  this file will be updated with the journal reference upon publication)
+  and/or the repository itself.
+title: "CPOE: COM-Poisson Orthogonal Expansion"
+type: software
+authors:
+  - family-names: Lee
+    given-names: Ji-Hun
+    affiliation: Gachon University
+  - family-names: Lee
+    given-names: Chae-Yon
+    affiliation: Gachon University
+  - family-names: Ha
+    given-names: Hyung-Tae
+    affiliation: Gachon University
+repository-code: "https://github.com/Cat-Hanbit/CPOE"
+license: MIT
+preferred-citation:
+  type: unpublished
+  title: >-
+    Semi-Parametric Extensions of the Conway-Maxwell-Poisson Distribution
+    via Orthogonal Polynomial Bases
+  authors:
+    - family-names: Lee
+      given-names: Ji-Hun
+    - family-names: Lee
+      given-names: Chae-Yon
+    - family-names: Ha
+      given-names: Hyung-Tae
+  year: 2026
+  notes: Manuscript under review.

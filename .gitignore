@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiment transients (regenerable; the final archive main_R500.npy IS tracked)
+experiments/mc_out/*_partial.npy
+experiments/mc_out/*.log
+experiments/mc_out/main_R5.npy
+experiments/mc_out/mc_risk_profiles.pdf
+results/_run_*.log
+
+# LaTeX build artifacts (supplement)
+papers/supp/*.aux
+papers/supp/*.log
+papers/supp/*.out
+papers/supp/*.toc
