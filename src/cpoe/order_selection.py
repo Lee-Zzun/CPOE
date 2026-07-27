@@ -5,6 +5,11 @@
   불편-위험 규칙 (eq:risk-profile):
       R̂(K) = Σ_{n=3}^K (2σ̂_n²/N − θ̂_n²),   K̂_RISK = argmin_K R̂(K)
       항별: θ̂_n² > 2σ̂_n²/N (계수>√2·SE)면 채택
+  BIC companion (rem:bic-companion):
+      p_K = 2 + max(K−2,0),  BIC(K) = −2ℓ̂_K + p_K log N,  K̂_BIC = argmin_K BIC(K)
+  L1 잔여에너지 진단 (Corollary~cor:cpoe-l1):
+      Ê_{K̂}^{1/2} = ( Σ_{n=K̂+1}^{K_max} (θ̂_n² − σ̂_n²/N)_+ )^{1/2}
+  within-replication oracle: K* = argmin_K L1(p_true, p̂_K)
 
 규약: θ̂_n(=raw MoM 투영)·σ̂_n²(=Var_p[ψ_n])는 고정기저(§4.1 MoM). basis.psi_matrix의
 열 j(0-based)는 ψ_{j+1}. 활성 전개는 n≥3 (θ_1=θ_2=0, Lemma theta12).
@@ -51,3 +56,37 @@ def select_k_risk(theta_hat: np.ndarray, sigma2: np.ndarray, N: int,
     R = risk_profile(theta_hat, sigma2, N, k_max)
     kmin = min(R, key=lambda k: (R[k], k))
     return int(kmin)
+
+
+def bic_values(loglik_by_K: Dict[int, float], N: int) -> Dict[int, float]:
+    """BIC(K) = −2ℓ̂_K + p_K log N,  p_K = 2 + max(K−2,0)."""
+    logN = np.log(N)
+    out = {}
+    for K, ll in loglik_by_K.items():
+        p_K = 2 + max(int(K) - 2, 0)
+        out[int(K)] = -2.0 * float(ll) + p_K * logN
+    return out
+
+
+def select_k_bic(loglik_by_K: Dict[int, float], N: int) -> int:
+    """K̂_BIC = argmin_K BIC(K)  (동률 시 최소 K)."""
+    bic = bic_values(loglik_by_K, N)
+    return int(min(bic, key=lambda k: (bic[k], k)))
+
+
+def oracle_k(l1_by_K: Dict[int, float]) -> int:
+    """within-replication oracle K* = argmin_K L1(p_true, p̂_K)  (동률 시 최소 K)."""
+    valid = {int(k): float(v) for k, v in l1_by_K.items() if np.isfinite(v)}
+    if not valid:
+        return -1
+    return int(min(valid, key=lambda k: (valid[k], k)))
+
+
+def residual_energy_sqrt(theta_hat: np.ndarray, sigma2: np.ndarray, N: int,
+                         khat: int, k_max: int) -> float:
+    """L1 잔여-스펙트럼 에너지 진단 Ê_{K̂}^{1/2} = (Σ_{n>K̂}(θ̂_n²−σ̂_n²/N)_+)^{1/2}."""
+    theta_hat = np.asarray(theta_hat, float)
+    sigma2 = np.asarray(sigma2, float)
+    lo = max(khat, 2)                     # n>khat, and n≥3 active
+    terms = theta_hat[lo:k_max] ** 2 - sigma2[lo:k_max] / N
+    return float(np.sqrt(np.maximum(terms, 0.0).sum()))

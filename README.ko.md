@@ -113,7 +113,8 @@ p_θ(x) = w_CMP(x; λ, ν) · (1 + Σₙ θₙ ψₙ(x; λ, ν))
 | `data_prep.py` | 실데이터 2종의 결정적 전처리. |
 | `diagnostics.py` | `empirical_pmf`, `l1_distance`. |
 | `baselines.py` | 크로스모델 비교용 적률매칭 Poisson/NB/CMP 베이스라인 pmf. |
-| `order_selection.py` | 위험 기반 차수선택: 투영 통계 `(θ̂ₙ, σ̂ₙ²)`, 위험 프로파일 `R̂(K) = Σₙ₌₃^K (2σ̂ₙ²/N − θ̂ₙ²)`, `K̂_RISK = argmin R̂(K)` — 차수 간 위험 *차이*의 비편향 추정량(논문 Proposition 4). |
+| `order_selection.py` | 위험 기반 차수선택: 투영 통계 `(θ̂ₙ, σ̂ₙ²)`, 위험 프로파일 `R̂(K) = Σₙ₌₃^K (2σ̂ₙ²/N − θ̂ₙ²)`, `K̂_RISK = argmin R̂(K)` — 차수 간 위험 *차이*의 비편향 추정량(논문 Proposition 4). 검증 전용 동반 도구(논문 표에는 미사용)도 포함: `BIC(K)`/`K̂_BIC`, within-replication oracle `K*`, 잔여에너지 진단 `Ê^{1/2}`. |
+| `estimators/mom_sandwich.py` | 검증 전용 MoM 2단계 **sandwich 공분산**: `(λ, ν, θ₃…θ_K)`의 stacked just-identified Z-추정으로 1단계 plug-in 오차를 `SE(θ̂ₙ)`에 전파; fixed-basis SE·몬테카를로 표준편차와 교차검증(`mc_tables.py` SE-check 표). |
 | `estimators/mom.py` | **적률법(MoM)**: 적률매칭 시스템 `μ_CMP = X̄`, `σ²_CMP = S²`의 Newton 해 → 닫힌형 경험투영 `θ̂ₙ = N⁻¹ Σᵢ ψₙ(Xᵢ)`; raw 투영이 `C_K`를 벗어나면 유클리드 QP로 복원. 셋 중 가장 저렴. |
 | `estimators/cmp_baseline.py` | 순수 CMP 최대우도(자연모수 좌표에서 오목) — Sequential 추정의 1단계. |
 | `estimators/mle_sequential.py` | **Sequential(2단계, 제한정보) MLE**: CMP-MLE로 베이스라인 적합 후, 베이스라인을 고정한 채 `θ ∈ C_K` 위에서 틸트 우도를 최대화 — 공유 볼록 내부 솔버 1회 호출. |
@@ -131,9 +132,10 @@ p_θ(x) = w_CMP(x; λ, ν) · (1 + Σₙ θₙ ψₙ(x; λ, ν))
 | `l2_eval.py` | `results/l2_*.csv`, `papers/supp/tables/l2_*.tex`, `papers/supp/figs/l2_*` | 고정차수 추정법 비교표; Supp 차수별 표 | ~10분 |
 | `highk_report.py` | `papers/figs/highk_pmfbase_*.pdf`(본문), `papers/supp/figs·tables/highk_*` | pmf overlay 그림; 동일차수 추정법 overlay(Supp) | ~5분 |
 | `data_pmf_overview.py` | `papers/figs/data_pmf_overview_sim.pdf`, `papers/supp/figs/data_pmf_overview_*` | 경험 pmf 개요 그림 | ~1분 |
-| `compute_orderselection.py` | stdout (차수선택 표의 값) | 적응적 차수선택 표 | ~2분 |
-| `mc_simulation.py --R 500` | `experiments/mc_out/main_R500.npy` | 몬테카를로 원시 기록 (6,000 적합) | 수 시간 (아카이브 동봉) |
-| `mc_tables.py` | stdout (MC 위험표), `mc_risk_profiles.pdf` | MC 위험표·위험 프로파일 그림 | 아카이브에서 ~1분 |
+| `compute_orderselection.py` | stdout (차수선택 표의 값; 검증 전용 `K̂_BIC`/`BIC`/`Ê^{1/2}` 열 포함) | 적응적 차수선택 표 | ~2분 |
+| `mc_simulation.py --R 500` | `experiments/mc_out/main_R500.npy` | 몬테카를로 원시 기록 (6,000 적합; 선택규칙·SE-check 필드 포함). `joint` 모드는 검증 전용 Joint 축소설계 실행 | 수 시간 (아카이브 동봉) |
+| `mc_tables.py` | stdout (MC 위험표; 검증 전용 selection/feasibility-동등성/SE-check 표 포함), `mc_risk_profiles.pdf` | MC 위험표·위험 프로파일 그림 | 아카이브에서 ~1분 |
+| `est2nd_eval.py` | `results/tables/est2nd.tex` | (검증 전용, 논문 미수록) 세 추정법의 feasibility(in-`C_K`)·적합시간 중앙값, `K = 4, 10` | ~30분 (Joint 적합) |
 | `task1_basis_comparison.py` | `results/task1_comparison.csv`, `papers/supp/tables/task1_*.tex`, 조건수 그림 | §5 기저 구성 비교의 정량 백킹 | ~1분 |
 | `highk_scenarios.py`, `highk_optimal_k.py`, `_datasets.py`, `highk_plots.py`, `highk_tables.py` | (위 드라이버들이 임포트하는 라이브러리) | — | — |
 
@@ -159,6 +161,10 @@ python experiments/task1_basis_comparison.py
 
 # 선택: 몬테카를로 연구 자체 재실행 (수 시간)
 python experiments/mc_simulation.py --R 500
+
+# 선택: 검증 전용 도구 (논문 표에는 미사용)
+python experiments/est2nd_eval.py                    # feasibility + 적합시간 표 (~30분, Joint 적합)
+python experiments/mc_simulation.py joint --R 100    # Joint 축소설계 MC (검증용)
 ```
 
 결정성: in-sample 표본은 고정 시드 20260606(시나리오별 오프셋), 몬테카를로는

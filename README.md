@@ -122,7 +122,8 @@ Two structural facts guarantee internal consistency:
 | `data_prep.py` | Deterministic preprocessing of the two real datasets. |
 | `diagnostics.py` | `empirical_pmf`, `l1_distance`. |
 | `baselines.py` | Moment-matched Poisson / negative-binomial / CMP baseline pmfs for the cross-model comparison. |
-| `order_selection.py` | Risk-based order selection: projection statistics `(θ̂ₙ, σ̂ₙ²)`, the risk profile `R̂(K) = Σₙ₌₃^K (2σ̂ₙ²/N − θ̂ₙ²)`, and `K̂_RISK = argmin R̂(K)` — an unbiased estimator of risk *differences* across orders (paper Proposition 4). |
+| `order_selection.py` | Risk-based order selection: projection statistics `(θ̂ₙ, σ̂ₙ²)`, the risk profile `R̂(K) = Σₙ₌₃^K (2σ̂ₙ²/N − θ̂ₙ²)`, and `K̂_RISK = argmin R̂(K)` — an unbiased estimator of risk *differences* across orders (paper Proposition 4). Also ships verification-only companions (not used in the paper's tables): `BIC(K)`/`K̂_BIC`, the within-replication oracle `K*`, and the residual-energy diagnostic `Ê^{1/2}`. |
+| `estimators/mom_sandwich.py` | Verification-only two-step **sandwich covariance** for the MoM estimator: stacked just-identified Z-estimation over `(λ, ν, θ₃…θ_K)` propagating the stage-1 plug-in error into `SE(θ̂ₙ)`; cross-checked against the fixed-basis SE and the Monte Carlo standard deviation (`mc_tables.py` SE-check table). |
 | `estimators/mom.py` | **Method of Moments**: Newton solve of the moment-matching system `μ_CMP = X̄`, `σ²_CMP = S²`, then the closed-form empirical projection `θ̂ₙ = N⁻¹ Σᵢ ψₙ(Xᵢ)`; if the raw projection leaves `C_K` it is restored by the Euclidean QP. Cheapest of the three. |
 | `estimators/cmp_baseline.py` | Pure CMP maximum likelihood (concave in the natural parameterization) — stage 1 of the Sequential estimator. |
 | `estimators/mle_sequential.py` | **Sequential (two-stage, limited-information) MLE**: fit the baseline by CMP-MLE, then maximize the tilt likelihood over `θ ∈ C_K` with the baseline held fixed — one call to the shared convex inner solver. |
@@ -140,9 +141,10 @@ threshold, so sensitivity sweeps are one-line configuration changes.
 | `l2_eval.py` | `results/l2_*.csv`, `papers/supp/tables/l2_*.tex`, `papers/supp/figs/l2_*` | fixed-order estimator table; per-order supplement tables | ~10 min |
 | `highk_report.py` | `papers/figs/highk_pmfbase_*.pdf` (body), `papers/supp/figs/highk_*`, `papers/supp/tables/highk_*` | pmf overlay figures; same-order estimator overlays (supplement) | ~5 min |
 | `data_pmf_overview.py` | `papers/figs/data_pmf_overview_sim.pdf`, `papers/supp/figs/data_pmf_overview_*` | empirical pmf overview figures | ~1 min |
-| `compute_orderselection.py` | stdout (values of the order-selection table) | adaptive order selection table | ~2 min |
-| `mc_simulation.py --R 500` | `experiments/mc_out/main_R500.npy` | raw Monte Carlo records (6,000 fits) | hours (archive shipped) |
-| `mc_tables.py` | stdout (Monte Carlo risk table), `mc_risk_profiles.pdf` | MC risk table and risk-profile figure | ~1 min from archive |
+| `compute_orderselection.py` | stdout (values of the order-selection table; plus verification-only `K̂_BIC`/`BIC`/`Ê^{1/2}` columns) | adaptive order selection table | ~2 min |
+| `mc_simulation.py --R 500` | `experiments/mc_out/main_R500.npy` | raw Monte Carlo records (6,000 fits), incl. selection-rule and SE-check fields; `joint` mode runs the verification-only Joint reduced design | hours (archive shipped) |
+| `mc_tables.py` | stdout (Monte Carlo risk table; plus verification-only selection / feasibility-equivalence / SE-check tables), `mc_risk_profiles.pdf` | MC risk table and risk-profile figure | ~1 min from archive |
+| `est2nd_eval.py` | `results/tables/est2nd.tex` | (verification only, not in the paper) feasibility (in-`C_K`) and median fit-time of the three estimators at `K = 4, 10` | ~30 min (Joint fits) |
 | `task1_basis_comparison.py` | `results/task1_comparison.csv`, `papers/supp/tables/task1_*.tex`, conditioning figure | quantitative backing of the basis-construction comparison in the computation section | ~1 min |
 | `highk_scenarios.py`, `highk_optimal_k.py`, `_datasets.py`, `highk_plots.py`, `highk_tables.py` | (libraries imported by the drivers above) | — | — |
 
@@ -168,6 +170,10 @@ python experiments/task1_basis_comparison.py
 
 # optional: re-run the Monte Carlo study itself (hours)
 python experiments/mc_simulation.py --R 500
+
+# optional: verification-only extras (not used by the paper's tables)
+python experiments/est2nd_eval.py                    # feasibility + fit-time table (~30 min, Joint fits)
+python experiments/mc_simulation.py joint --R 100    # Joint reduced-design MC (verification)
 ```
 
 Determinism: in-sample sampling uses the fixed seed 20260606 (per-scenario
